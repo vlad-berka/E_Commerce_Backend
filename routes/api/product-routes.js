@@ -7,12 +7,35 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  try {
+    const db_Product_Data = await Product.findAll();
+    
+    const Product_Data = db_Product_Data.map((product) =>
+    product.get({ plain: true })
+  );
+    console.log("GET-ALL request on Product DB. All products are: ", Product_Data);
+    res.status(200).json(Product_Data);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // get one product
 router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
+  try {
+    const Product_Data = await Product.findByPk(req.params.id);
+
+    if (!Product_Data) {
+      res.status(404).json({message: `Error, no product with id: ${req.params.id}`});
+      return;
+    }
+    console.log(`GET-SINGLE request on Product DB. Product with ID ${req.params.id} is: `, Product_Data);
+    res.status(200).json(Product_Data);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // create new product
@@ -91,6 +114,22 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
+  try {
+    const Product_Data = await Product.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    if(!Product_Data) {
+      res.status(404).json({message: `Error, no product found with ID: ${req.params.id}`});
+      return;
+    }
+    console.log(`DELETE-SINGLE request on Product DB. Deleted product with ID ${req.params.id} is: `, Product_Data);
+    res.status(200).json(Product_Data);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
