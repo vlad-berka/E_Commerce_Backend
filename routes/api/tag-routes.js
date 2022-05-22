@@ -56,7 +56,7 @@ router.put("/:id", async (req, res) => {
     {
       // Gets a tag based on the tag_id given in the request parameters
       where: {
-        tag_id: req.params.id,
+        id: req.params.id,
       },
     }
   )
