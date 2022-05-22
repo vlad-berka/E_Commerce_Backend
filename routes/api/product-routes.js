@@ -4,16 +4,15 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 // The `/api/products` endpoint
 
 // get all products
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
   try {
-    const db_Product_Data = await Product.findAll();
+    const Product_Data = await Product.findAll({
+      include: [{model: Category}, {model: Tag, as: 'product_tags'}]
+    });
     
-    const Product_Data = db_Product_Data.map((product) =>
-    product.get({ plain: true })
-  );
-    console.log("GET-ALL request on Product DB. All products are: ", Product_Data);
+    // console.log("GET-ALL request on Product DB. All products are: ", Product_Data);
     res.status(200).json(Product_Data);
   } catch (err) {
     res.status(500).json(err);
@@ -21,7 +20,7 @@ router.get('/', (req, res) => {
 });
 
 // get one product
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
   try {
@@ -31,7 +30,7 @@ router.get('/:id', (req, res) => {
       res.status(404).json({message: `Error, no product with id: ${req.params.id}`});
       return;
     }
-    console.log(`GET-SINGLE request on Product DB. Product with ID ${req.params.id} is: `, Product_Data);
+    // console.log(`GET-SINGLE request on Product DB. Product with ID ${req.params.id} is: `, Product_Data);
     res.status(200).json(Product_Data);
   } catch (err) {
     res.status(500).json(err);
@@ -112,7 +111,7 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete one product by its `id` value
   try {
     const Product_Data = await Product.destroy({

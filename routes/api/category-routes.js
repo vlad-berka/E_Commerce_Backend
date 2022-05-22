@@ -3,24 +3,26 @@ const { Category, Product } = require('../../models');
 
 // The `/api/categories` endpoint
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   // find all categories
   // be sure to include its associated Products
   try {
-    const Cat_Data = await Category.findAll();
-    console.log("GET-ALL request on Category DB. All tags are: ", Cat_Data);
+    const Cat_Data = await Category.findAll({
+      include: [{model: Product}]
+    });
+    // console.log("GET-ALL request on Category DB. All tags are: ", Cat_Data);
     res.status(200).json(Cat_Data);
   } catch (err) {
     res.status(404).json(err);
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   // find one category by its `id` value
   // be sure to include its associated Products
   try {
     const Cat_Data = await Category.findByPk(req.params.id, {
-      include: [{ model: Product, through: ProductTag, as: 'Category_product' }]
+      include: [{ model: Product}]
     });
 
     if (!Cat_Data) {
@@ -34,7 +36,7 @@ router.get('/:id', (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // create a new category
   try {
     const Cat_Data = await Category.create(req.body);
@@ -44,18 +46,17 @@ router.post('/', (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a category by its `id` value
   Category.update(
     {
       // All the fields you can update and the data attached to the request body.
-      id: req.body.id,
       category_name: req.body.category_name,
     },
     {
-      // Gets a category based on the book_id given in the request parameters
+      // Gets a category based on the category id given in the request parameters
       where: {
-        tag_id: req.params.id,
+        id: req.params.id,
       },
     }
   )
@@ -68,10 +69,10 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete a category by its `id` value
   try {
-    const Cat_Data = await Tag.destroy({
+    const Cat_Data = await Category.destroy({
       where: {
         id: req.params.id
       }
